@@ -1,0 +1,70 @@
+# Coolify deployment compose for Gibbon.
+#
+# In Coolify:
+#   Build pack: Docker Compose
+#   Base Directory: /
+#   Docker Compose Location: /compose.coolify.yaml
+#   Domain → service: app, port: 80
+#
+# Set these environment variables in Coolify before first deploy:
+#   MYSQL_PASSWORD, MYSQL_ROOT_PASSWORD
+# Optional: MYSQL_DATABASE, MYSQL_USER, PHP_VERSION, MYSQL_VERSION, TIMEZONE
+#
+# After deploy, open the app URL and complete the Gibbon web installer.
+# Database Server: db
+# Database Name / User / Password: values from Coolify env (defaults below).
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: resources/ops/Dockerfile.coolify
+      args:
+        PHP_VERSION: ${PHP_VERSION:-8.3}
+    restart: unless-stopped
+    environment:
+      # Lets Coolify attach a generated HTTPS URL to this service on port 80
+      SERVICE_URL_APP_80: /
+    volumes:
+      - gibbon_uploads:/var/www/html/uploads
+      - gibbon_persist:/var/gibbon-persist
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1/ >/dev/null || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+    networks:
+      - gibbon
+
+  db:
+    image: mysql:${MYSQL_VERSION:-8.0}
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-gibbon}
+      MYSQL_USER: ${MYSQL_USER:-gibbon}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?}
+      TZ: ${TIMEZONE:-UTC}
+    volumes:
+      - gibbon_db_data:/var/lib/mysql
+    command: --default-authentication-plugin=mysql_native_password
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - gibbon
+
+networks:
+  gibbon:
+
+volumes:
+  gibbon_uploads:
+  gibbon_persist:
+  gibbon_db_data:

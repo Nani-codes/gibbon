@@ -17,11 +17,16 @@ vendor/
 
 # Docker files themselves
 Dockerfile
+Dockerfile.coolify
 docker-compose*.yaml
+compose.coolify.yaml
+compose*.yaml
 .dockerignore
 ops/resources/ops/compose*.yaml
+resources/ops/compose*.yaml
 resources/ops/configuration/gibbon/.env-example
 up.sh
+setup_devdb.sh
 
 # IDE and OS files
 .DS_Store
