@@ -3,7 +3,7 @@
 # In Coolify:
 #   Build pack: Docker Compose
 #   Base Directory: /
-#   Docker Compose Location: /compose.coolify.yaml
+#   Docker Compose Location: /docker-compose.yaml   (Coolify default)
 #   Domain → service: app, port: 80
 #
 # Set these environment variables in Coolify before first deploy:

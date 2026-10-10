@@ -20,6 +20,7 @@ Dockerfile
 Dockerfile.coolify
 docker-compose*.yaml
 compose.coolify.yaml
+docker-compose.yaml
 compose*.yaml
 .dockerignore
 ops/resources/ops/compose*.yaml
