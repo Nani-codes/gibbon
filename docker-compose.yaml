@@ -51,13 +51,18 @@ services:
       TZ: ${TIMEZONE:-UTC}
     volumes:
       - gibbon_db_data:/var/lib/mysql
-    command: --default-authentication-plugin=mysql_native_password
+    # Avoid putting secrets in the healthcheck command — Coolify/compose
+    # interpolation of ${MYSQL_ROOT_PASSWORD} often marks the DB unhealthy.
+    command:
+      - --default-authentication-plugin=mysql_native_password
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-p${MYSQL_ROOT_PASSWORD}"]
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
       interval: 10s
       timeout: 5s
-      retries: 10
-      start_period: 30s
+      retries: 12
+      start_period: 60s
     networks:
       - gibbon
 

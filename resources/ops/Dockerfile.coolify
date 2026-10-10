@@ -41,7 +41,7 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
     curl \
     mbstring
 
-RUN a2enmod rewrite \
+RUN a2enmod rewrite setenvif remoteip \
     && sed -i 's/AllowOverride None/AllowOverride All/g' /etc/apache2/apache2.conf \
     && printf '%s\n' \
         '<Directory /var/www/html>' \
@@ -49,6 +49,8 @@ RUN a2enmod rewrite \
         '    AllowOverride All' \
         '    Require all granted' \
         '</Directory>' \
+        '# Coolify / Traefik terminates TLS; trust forwarded proto for HTTPS checks' \
+        'SetEnvIf X-Forwarded-Proto "https" HTTPS=on' \
         >> /etc/apache2/apache2.conf
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
